@@ -6,7 +6,7 @@ const MainLayout = () => {
         <>
             <Header />
             <Outlet />
-            <footer className="bg-gray-900 text-gray-300 py-3a px-4 md:px-10">
+            <footer className="bg-gray-900 text-gray-300 py-1 px-4 md:px-10">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-center items-center gap-4">
 
                     <div className="text-center md:text-left flex gap-x-4">
@@ -15,6 +15,7 @@ const MainLayout = () => {
                     </div>
                 </div>
             </footer>
+
         </>
     );
 };

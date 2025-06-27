@@ -6,17 +6,20 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-//   useEffect(() => {
-//     const savedUser = localStorage.getItem('user');
-//     if (savedUser) {
-//       setUser(JSON.parse(savedUser));
-//     }
-//     setLoading(false);
-//   }, []);
+  useEffect(() => {
+    const savedUser = localStorage.getItem('esim-user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+    setLoading(false);
+  }, []);
 
-  const login = (userData) => {
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
+  const setUserInContext = (userData) => {
+    // console.log(userData)
+    setUser(userData.data.profile);
+    localStorage.setItem('esim-user', JSON.stringify(userData.data.profile));
+    localStorage.setItem('esim-accessToken', JSON.stringify(userData.data.accessToken));
+    localStorage.setItem('esim-refreshToken', JSON.stringify(userData.data.refreshToken));
   };
 
   const logout = () => {
@@ -33,7 +36,7 @@ export const UserProvider = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ user, loading, login, logout, updateUser }}>
+    <UserContext.Provider value={{ user, setUser, loading, setUserInContext, logout, updateUser }}>
       {children}
     </UserContext.Provider>
   );

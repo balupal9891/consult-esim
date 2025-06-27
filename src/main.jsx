@@ -9,9 +9,15 @@ import SignupPage from './components/Signup';
 import DashboardPage from './components/Dashboard';
 import { AppContextProvider } from './appContext/AppContext';
 import ProductPage from './components/ProductPage';
-import Header from './components/Header.jsx';
 import ContactPage from './components/Contact.jsx';
 import MainLayout from './layout/MainLayout.jsx';
+import ProductsPage from './components/ProductsPage.jsx';
+import OrdersPage from './components/OrdersPage.jsx';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
+import ProfilePage from './components/ProfilePage.jsx';
+import OrderViewPage from './components/OrderViewPage.jsx';
+import DashboardLayout from './layout/DashbaordLayout.jsx';
+import CartPage from './components/CartPage.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -20,11 +26,16 @@ createRoot(document.getElementById('root')).render(
       <BrowserRouter>
         <Routes>
           {/* Routes that use Header */}
-          <Route element={<MainLayout />}>
+          <Route  element={<MainLayout />}>
             <Route path="/" element={<App />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/contact" element={<ContactPage />} />
-            <Route path="/product/:id" element={<ProductPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+            <Route path="/dashboard/products" element={<DashboardLayout> <ProductsPage /> </DashboardLayout>} />
+            <Route path="/dashboard/orders" element={<DashboardLayout> <OrdersPage /> </DashboardLayout>} />
+            <Route path="/dashboard/products/:id" element={<ProductPage />} />
+            <Route path="/dashboard/orders/:id" element={<OrderViewPage />} />
           </Route>
 
           {/* Routes that should not show Header */}

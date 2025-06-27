@@ -4,23 +4,17 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useUser } from "../appContext/UserContext";
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 
 export default function SignupPage() {
 
-    const {login} = useUser();
+    const { setUserInContext } = useUser();
 
-    let userInitial = {
-        fullname: '',
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        region: 'default'
-    }
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [user, setUser] = useState(userInitial);
     const regionOptions = [
         { name: 'Afghanistan', code: 'AF' },
         { name: 'Åland Islands', code: 'AX' },
@@ -267,27 +261,65 @@ export default function SignupPage() {
         { name: 'Zimbabwe', code: 'ZW' }
     ]
 
-    const handleSubmitSignup = async (e) => {
-        e.preventDefault();
-        console.log(user);
-        if (user?.password !== user?.confirmPassword) {
-            toast.error('Password not matched');
-            return;
-        }
-        const response = await fetch('https://consultit-esim.onrender.com/api/auth/sign-up', {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ userName: user?.username, password: user?.password }),
-        })
-        console.log(response);
-        if (response) {
-            await login(response?.data?.profile);
-            console.log('signup')
-            // navigate('/');
-        }
-    };
+    const formik = useFormik({
+        initialValues: {
+            fullname: '',
+            username: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+            region: '',
+        },
+        validationSchema: Yup.object({
+            fullname: Yup.string()
+                .min(3, 'Fullname must be at least 3 characters')
+                .required('Fullname is required'),
+            username: Yup.string()
+                .min(3, 'Username must be at least 3 characters')
+                .required('Username is required'),
+            email: Yup.string()
+                .email('Invalid email format')
+                .matches(/^[\w.+-]+@gmail\.com$/, 'Only Gmail addresses allowed')
+                .required('Email is required'),
+            password: Yup.string()
+                .min(6, 'Password must be at least 6 characters')
+                .required('Password is required'),
+            confirmPassword: Yup.string()
+                .required('confirmPassword is required')
+            .oneOf([Yup.ref('password')], 'confirmPassword must match'),
+        }),
+        onSubmit: async (values) => {
+            setLoading(true)
+
+            const checkUsername = await fetch(`${import.meta.env.VITE_SERVER_URL}/auth/check-username/${values.username}`);
+            const usernameData = await checkUsername.json();
+            if (usernameData?.data?.isAvaible == false) {
+                formik.setErrors({ username: 'Username not available' });
+            }
+            else {
+                const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/auth/sign-up`, {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ userName: values.username, password: values.password }),
+                })
+                if (response.ok) {
+                    const data = await response.json();
+                    setUserInContext(data);
+                    navigate('/dashboard');
+                }
+                else {
+                    toast.error(await response.json().then((data) => (
+                        data.error
+                    )));
+                }
+            }
+            setLoading(false)
+
+
+        },
+    });
 
 
     return (
@@ -298,51 +330,61 @@ export default function SignupPage() {
                 <div className="relative z-10 bg-blue-950 border-[3px solid] border-indigo-950  text-gray-900 dark:text-white rounded-xl  shadow-offset-x1-y1 shadow-lg p-10 w-full max-w-sm">
                     <h2 className="text-3xl font-bold mb-6 text-center">Signup Account</h2>
 
-                    <form className="" onSubmit={handleSubmitSignup}>
+                    <form className="" onSubmit={formik.handleSubmit} >
 
-                        {/* <div>
+                        <div>
                             <label className="block mb-1">FullName</label>
                             <input
+                                name="fullname"
                                 type="text"
                                 placeholder="Fullname"
                                 className="w-full py-1 rounded-md border border-gray-300 text-center"
-                                required
-                                value={user?.fullname}
-                                onChange={(e) => setUser(prev => ({ ...prev, fullname: e.target.value }))}
+                                value={formik.values.fullname}
+                                onChange={formik.handleChange}
                             />
-                        </div> */}
+                            {formik.touched.fullname && formik.errors.fullname && (
+                                <div className="text-red-500 text-sm">{formik.errors.fullname}</div>
+                            )}
+                        </div>
                         <div>
                             <label className="block mb-1">Username</label>
                             <input
                                 type="text"
+                                name='username'
                                 placeholder="Username"
                                 className="w-full py-1 rounded-md border border-gray-300 text-center"
-                                required
-                                value={user?.username}
-                                onChange={(e) => setUser(prev => ({ ...prev, username: e.target.value }))}
+                                value={formik.values.username}
+                                onChange={formik.handleChange}
                             />
+                            {formik.touched.username && formik.errors.username && (
+                                <div className="text-red-500 text-sm">{formik.errors.username}</div>
+                            )}
                         </div>
-                        {/* <div>
+                        <div>
                             <label className="block mb-1">Email</label>
                             <input
+                                name="email"
                                 type="email"
                                 placeholder="you@example.com"
                                 className="w-full py-1 rounded-md border border-gray-300 text-center"
-                                required
-                                value={user?.email}
-                                onChange={(e) => setUser(prev => ({ ...prev, email: e.target.value }))}
+                                value={formik.values.email}
+                                onChange={formik.handleChange}
                             />
-                        </div> */}
+                            {formik.touched.email && formik.errors.email && (
+                                <div className="text-red-500 text-sm">{formik.errors.email}</div>
+                            )}
+                        </div>
                         <div>
                             <label className="block mb-1">Password</label>
                             <div className="relative">
                                 <input
+                                    name='password'
                                     type={showPassword ? "text" : "password"}
                                     placeholder="••••••••"
                                     className="w-full py-1 rounded-md border border-gray-300  text-center"
                                     required
-                                    value={user?.password}
-                                    onChange={(e) => setUser(prev => ({ ...prev, password: e.target.value }))}
+                                    value={formik.values.password}
+                                    onChange={formik.handleChange}
                                 />
                                 <span
                                     className="absolute right-3 top-2.5 cursor-pointer text-gray-300 "
@@ -350,6 +392,9 @@ export default function SignupPage() {
                                 >
                                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                 </span>
+                                {formik.touched.username && formik.errors.password && (
+                                    <div className="text-red-500 text-sm">{formik.errors.password}</div>
+                                )}
 
                             </div>
                         </div>
@@ -357,12 +402,13 @@ export default function SignupPage() {
                             <label className="block mb-1">Confirm Password</label>
                             <div className="relative">
                                 <input
+                                    name="confirmPassword"
                                     type={showConfirmPassword ? "text" : "password"}
                                     placeholder="••••••••"
                                     className="w-full py-1 rounded-md border border-gray-300 text-center"
                                     required
-                                    value={user?.confirmPassword}
-                                    onChange={(e) => setUser(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                                    value={formik.values.confirmPassword}
+                                    onChange={formik.handleChange}
                                 />
                                 <span
                                     className="absolute right-3 top-2.5 cursor-pointer text-gray-300 "
@@ -370,13 +416,16 @@ export default function SignupPage() {
                                 >
                                     {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                 </span>
+                                {formik.touched.confirmPassword && formik.errors.confirmPassword && (
+                                    <div className="text-red-500 text-sm">{formik.errors.confirmPassword}</div>
+                                )}
                             </div>
                         </div>
                         {/* <div>
                             <label className="block mb-1">Region</label>
                             <select name="region" id="region" className="w-full py-1 rounded-md border border-gray-300 "
-                                value={user?.region}
-                                onChange={(e) => setUser(prev => ({ ...prev, region: e.target.value }))}
+                                value={formik.values.region}
+                                onChange={formik.handleChange}
                             >
                                 {regionOptions.map(region => (
                                     <option className="text-black">{region.name}</option>
@@ -388,7 +437,7 @@ export default function SignupPage() {
                                 type="submit"
                                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-1 rounded-md transition duration-200"
                             >
-                                Signup
+                                {loading ? <span className="loading loading-spinner loading-lg"></span> : 'Signup'}
                             </button>
                         </div>
 

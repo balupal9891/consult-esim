@@ -1,8 +1,10 @@
 import { useOrders } from '../appContext/OrderContext';
+import DashboardLayout from '../layout/DashbaordLayout';
+import { Link } from 'react-router-dom';
 
 export default function OrdersPage() {
 
-    const { orders } = useOrders();
+    const { orders, loading } = useOrders();
 
     async function handleCancelOrder(order){
         const response = fetch('/products/orders/cancel', {
@@ -20,10 +22,12 @@ export default function OrdersPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 py-10 px-6 flex flex-col items-center">
+        <div className="min-h-screen bg-gray-100 py-10 px-6 flex flex-col flex-1 overflow-scroll items-center">
             <h2 className='text-2xl font-semibold px-2 mb-4 w-full text-center  text-black'>Orders</h2>
             {orders.length > 0 && orders.map((order, inx) => (
-                <div className="bg-white shadow-md rounded-2xl p-6 mb-4 w-full max-w-2xl text-lg text-black">
+                <Link
+                to={`/dashboard/orders/${order.id}`} 
+                className="bg-white shadow-md rounded-2xl p-6 mb-4 w-full max-w-2xl text-lg text-black">
                     <div className="flex justify-between items-center mb-2">
                         <h2 className="text-lg font-semibold text-blue-500">
                             OrderId: {order.id}
@@ -55,7 +59,7 @@ export default function OrdersPage() {
                     </div>
 
                     
-                </div>
+                </Link>
             ))}
         </div>
     );

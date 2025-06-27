@@ -1,59 +1,133 @@
 import { useParams, Link } from 'react-router-dom';
 import { useProducts } from '../appContext/ProductContext';
+import { useState } from 'react';
 import DashboardLayout from '../layout/DashbaordLayout';
 
 
-export default function ProductPage({}) {
+export default function ProductPage({ }) {
     const { id } = useParams();
-    // const id = productId;
     const { products } = useProducts();
-    const product = products.find((p) => p.id === id);
+    const product = products.find((p) => p.id == id);
 
     async function handleOrder() {
-        
+
     }
 
     if (!product) {
-        return <div className="text-center mt-20 text-red-500">Product not found.</div>;
+        return <div className="text-center text-2xl mt-20 text-red-500">Product not found.</div>;
     }
+
 
     return (
         <>
-        <DashboardLayout>
-            <div className="min-h-screen bg-gray-100 py-10 px-6">
-                <div className="max-w-4xl h-auto mx-auto p-6">
-                    <div className="md:w-1/2 p-6 flex flex-col rounded-lg justify-between bg-slate-200">
-                        <div>
-                            <h1 className="text-2xl font-bold text-gray-800 mb-2">{product.name}</h1>
-                            <p className="text-indigo-600 text-xl font-semibold mb-4">Price: {product.price}</p>
+            <DashboardLayout>
+                {/* <div className="min-h-[calc(100vh-16)] bg-white py-10 px-4 w-full flex flex-1 justify-center items-center">
+                    <div className="max-w-3xl mx-auto bg-slate-100 shadow-xl rounded-2xl p-8">
+                        <h1 className="text-3xl font-bold text-gray-800 mb-4">{product.name}</h1>
 
-                            <ul className="space-y-1 text-gray-700 text-sm">
-                                <li><strong>Data:</strong> {product.data}</li>
-                                <li><strong>Region:</strong> {product.region}</li>
-                                <li><strong>Validity:</strong> {product.validity}</li>
-                                <li><strong>Plan Type:</strong> {product.planType}</li>
-                            </ul>
-
-                            <ul className="space-y-1 text-gray-700 text-sm">
-                                <h2><strong>Country available:</strong></h2>
-                                {product?.countries.map(country => (
-                                    <li>{country.country_name}</li>
-                                ))}
-                            </ul>
+                        <div className="mb-4">
+                            <p className="text-2xl text-indigo-600 font-semibold">
+                                ₹{product.price}
+                            </p>
+                            <p className="text-sm text-gray-500">One-time payment</p>
                         </div>
-                      
 
-                        <button 
-                        className="mt-6 bg-indigo-600 text-white px-6 py-2 rounded-xl hover:bg-indigo-700 transition"
-                        onClick={handleOrder}
+                        <div className="grid grid-cols-2 gap-4 text-md text-gray-700 mb-6">
+                            <div>
+                                <span className="font-medium">Data:</span> {product.data}
+                            </div>
+                            <div>
+                                <span className="font-medium">Region:</span> {product.region}
+                            </div>
+                            <div>
+                                <span className="font-medium">Validity:</span> {product.validity}
+                            </div>
+                            <div>
+                                <span className="font-medium">Plan Type:</span> {product.planType}
+                            </div>
+                        </div>
+
+                        <div className="mb-6">
+                            <p className="text-md font-medium text-gray-800 mb-2">Countries Available:</p>
+                            <div className="flex flex-wrap gap-2">
+                                {product.countries.map((country, i) => (
+                                    <span
+                                        key={i}
+                                        className="bg-indigo-700 text-white font-semibold text-xs px-3 py-1 rounded-full"
+                                    >
+                                        {country.country_name}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={handleOrder}
+                            className="w-full mt-6 bg-indigo-600 text-white py-3 rounded-xl hover:bg-indigo-700 transition text-lg font-semibold"
                         >
-                            Order now
+                            Buy Now – ${product.price}
                         </button>
                     </div>
+                </div> */}
 
+                <div className="max-h-[calc(100vh-16)] w-full bg-gradient-to-br from-white via-indigo-50 to-purple-100 px-4 py-10 flex justify-center items-center">
+                    <div className="max-w-2xl bg-white rounded-2xl shadow-2xl p-6 sm:p-8 transition-all duration-300">
+                        {/* Product Name */}
+                        <h1 className="text-3xl sm:text-4xl font-extrabold text-indigo-700 mb-4 text-center">
+                            {product.name}
+                        </h1>
+
+                        {/* Price Section */}
+                        <div className="mb-6 text-center">
+                            <p className="text-2xl sm:text-3xl text-purple-600 font-semibold mb-1">
+                                {product.price}
+                            </p>
+                            <p className="text-sm text-gray-500">One-time payment</p>
+                        </div>
+
+                        {/* Product Details Grid */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700 text-base mb-6">
+                            <div>
+                                <span className="font-medium text-indigo-700">📶 Data:</span> {product.data}
+                            </div>
+                            <div>
+                                <span className="font-medium text-indigo-700">🌍 Region:</span> {product.region}
+                            </div>
+                            <div>
+                                <span className="font-medium text-indigo-700">📅 Validity:</span> {product.validity}
+                            </div>
+                            <div>
+                                <span className="font-medium text-indigo-700">📦 Plan Type:</span> {product.planType}
+                            </div>
+                        </div>
+
+                        {/* Country Tags */}
+                        <div className="mb-6">
+                            <p className="text-md font-semibold text-gray-800 mb-2">🗺️ Countries Available:</p>
+                            <div className="flex flex-wrap gap-2">
+                                {product.countries.map((country, i) => (
+                                    <span
+                                        key={i}
+                                        className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm"
+                                    >
+                                        {country.country_name}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Buy Now Button */}
+                        <button
+                            onClick={handleOrder}
+                            className="w-full mt-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl hover:scale-[1.02] hover:shadow-lg transition text-lg font-semibold"
+                        >
+                            Buy Now – {product.price}
+                        </button>
+                    </div>
                 </div>
-            </div>
-        </DashboardLayout>
+
+
+            </DashboardLayout>
         </>
 
 
